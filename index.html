@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Riddle Challenge</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #ffd6e8, #dce8ff, #fff1b8);
+    overflow: hidden;
+}
+
+/* Background decoration */
+.circle {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.35;
+    z-index: -1;
+}
+
+.circle.one {
+    width: 250px;
+    height: 250px;
+    background: #ff7fa5;
+    top: -80px;
+    left: -70px;
+}
+
+.circle.two {
+    width: 300px;
+    height: 300px;
+    background: #9585ff;
+    bottom: -120px;
+    right: -100px;
+}
+
+/* Main container */
+.game-container {
+    width: 92%;
+    max-width: 750px;
+    text-align: center;
+}
+
+/* Title */
+.title {
+    font-size: 42px;
+    font-weight: 800;
+    color: #54205c;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #70486f;
+    margin-bottom: 22px;
+}
+
+/* Progress */
+.progress {
+    width: 100%;
+    max-width: 500px;
+    height: 10px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 20px;
+    margin: auto;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 4%;
+    background: linear-gradient(90deg, #ff5c8a, #8e7dff);
+    border-radius: 20px;
+    transition: width 0.4s ease;
+}
+
+.counter {
+    margin: 10px 0 20px;
+    color: #633c65;
+    font-weight: 600;
+}
+
+/* Flashcard */
+.card-wrapper {
+    width: 100%;
+    height: 360px;
+    perspective: 1200px;
+    cursor: pointer;
+}
+
+.flashcard {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.7s ease;
+}
+
+.flashcard.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-side {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 30px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    padding: 40px;
+
+    box-shadow: 0 20px 45px rgba(90,60,100,0.2);
+}
+
+/* Front */
+.front {
+    background: linear-gradient(135deg, #ff80a6, #ffb5ca);
+    color: white;
+}
+
+/* Back */
+.back {
+    background: linear-gradient(135deg, #8675f5, #b4a8ff);
+    color: white;
+    transform: rotateY(180deg);
+}
+
+.card-icon {
+    font-size: 55px;
+    margin-bottom: 10px;
+}
+
+.card-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
+.riddle-text {
+    font-size: 23px;
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+.answer-text {
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.click-hint {
+    position: absolute;
+    bottom: 20px;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+/* Buttons */
+.controls {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+button {
+    border: none;
+    padding: 13px 22px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+button:hover {
+    transform: translateY(-3px);
+}
+
+.nav-btn {
+    background: white;
+    color: #5a3963;
+    box-shadow: 0 8px 20px rgba(70,50,90,0.15);
+}
+
+.flip-btn {
+    background: #6846c7;
+    color: white;
+}
+
+.end-game {
+    margin-top: 25px;
+    background: #ff4f6d;
+    color: white;
+    padding: 14px 35px;
+}
+
+/* Thank You */
+.thank-you {
+    display: none;
+    animation: fadeIn 0.8s ease;
+}
+
+.thank-you.show {
+    display: block;
+}
+
+.game-container.finished .game-content {
+    display: none;
+}
+
+.thank-icon {
+    font-size: 90px;
+    animation: bounce 1s infinite alternate;
+}
+
+.thank-you h1 {
+    font-size: 52px;
+    color: #54205c;
+    margin: 15px 0;
+}
+
+.thank-you p {
+    font-size: 19px;
+    color: #654767;
+    line-height: 1.7;
+}
+
+.play-again {
+    margin-top: 30px;
+    background: linear-gradient(135deg, #ff5c8a, #8e7dff);
+    color: white;
+}
+
+/* Confetti */
+.confetti {
+    position: fixed;
+    top: -20px;
+    animation: fall 3s linear forwards;
+    z-index: 10;
+}
+
+/* Animations */
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(720deg);
+    }
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Mobile */
+@media(max-width:600px) {
+
+    .title {
+        font-size: 32px;
+    }
+
+    .card-wrapper {
+        height: 340px;
+    }
+
+    .card-side {
+        padding: 25px;
+    }
+
+    .riddle-text {
+        font-size: 19px;
+    }
+
+    .answer-text {
+        font-size: 27px;
+    }
+
+    .thank-you h1 {
+        font-size: 40px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="circle one"></div>
+<div class="circle two"></div>
+
+<div class="game-container" id="gameContainer">
+
+    <!-- GAME SCREEN -->
+    <div class="game-content">
+
+        <h1 class="title">🧩 Riddle Challenge</h1>
+
+        <p class="subtitle">
+            Think carefully... Can you solve them? ✨
+        </p>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="counter" id="counter">
+            Riddle 1 / 25
+        </div>
+
+
+        <!-- FLASHCARD -->
+        <div class="card-wrapper" onclick="flipCard()">
+
+            <div class="flashcard" id="flashcard">
+
+                <!-- FRONT -->
+                <div class="card-side front">
+
+                    <div class="card-icon">🧠</div>
+
+                    <div class="card-label">
+                        Riddle
+                    </div>
+
+                    <div class="riddle-text" id="riddleText">
+                        Loading...
+                    </div>
+
+                    <div class="click-hint">
+                        👆 Click to reveal answer
+                    </div>
+
+                </div>
+
+
+                <!-- BACK -->
+                <div class="card-side back">
+
+                    <div class="card-icon">💡</div>
+
+                    <div class="card-label">
+                        Answer
+                    </div>
+
+                    <div class="answer-text" id="answerText">
+                        Answer
+                    </div>
+
+                    <div class="click-hint">
+                        👆 Click to flip back
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONTROLS -->
+        <div class="controls">
+
+            <button class="nav-btn" onclick="previousRiddle(event)">
+                ← Previous
+            </button>
+
+            <button class="flip-btn" onclick="flipCard(event)">
+                🔄 Flip Card
+            </button>
+
+            <button class="nav-btn" onclick="nextRiddle(event)">
+                Next →
+            </button>
+
+        </div>
+
+
+        <!-- END GAME -->
+        <button class="end-game" onclick="endGame(event)">
+            🛑 End Game
+        </button>
+
+    </div>
+
+
+    <!-- THANK YOU SCREEN -->
+    <div class="thank-you" id="thankYou">
+
+        <div class="thank-icon">🎉</div>
+
+        <h1>Thank You!</h1>
+
+        <p>
+            Thank you for participating in the
+            <strong>Riddle Challenge!</strong> 🧩
+        </p>
+
+        <p>
+            Hope you had fun solving the riddles! 💕✨
+        </p>
+
+        <button class="play-again" onclick="playAgain()">
+            🔄 Play Again
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   YOUR RIDDLES
+===================================================== */
+
+const riddles = [
+
+    {
+        question:
+        "The more examples you give me, the more smarter I become. I don’t think like human but I recognize patterns. What am I?",
+        answer:
+        "Machine Learning Model (AI)"
+    },
+
+    {
+        question:
+        "I am always in front of you but can never be seen. What am I?",
+        answer:
+        "The Future"
+    },
+
+    {
+        question:
+        "I never forget, yet I can be erased. I never lie, yet I can be corrupted. Every computer depends on me, but no one ever sees me working. What am I?",
+        answer:
+        "Storage"
+    },
+
+    {
+        question:
+        "What goes up but never goes down?",
+        answer:
+        "Age"
+    },
+
+    {
+        question:
+        "I'm the main board where everything connects — brain, memory, and more. What am I?",
+        answer:
+        "Motherboard"
+    },
+
+    {
+        question:
+        "The more of me you take, the more of me you leave behind. What am I?",
+        answer:
+        "Footprints"
+    },
+
+    {
+        question:
+        "I’m much smaller than RAM but significantly faster. I hold onto exactly what the processor thinks it will need next. What am I?",
+        answer:
+        "Cache Memory"
+    },
+
+    {
+        question:
+        "I am not seen while going up but I am seen while coming down. What am I?",
+        answer:
+        "Water"
+    },
+
+    {
+        question:
+        "I'm the short-term memory. Turn off the power, and I forget everything. What am I?",
+        answer:
+        "RAM Memory"
+    },
+
+    {
+        question:
+        "What starts with T, ends with T, and has T inside it?",
+        answer:
+        "Teapot"
+    },
+
+    {
+        question:
+        "I can store thousands of files, but I have no shelves. What am I?",
+        answer:
+        "Computer / Hard Drive"
+    },
+
+    {
+        question:
+        "I sound like I belong to the sky and affect the weather, but I am really just someone else’s computer in a massive data centre?",
+        answer:
+        "Cloud"
+    },
+
+    {
+        question:
+        "I talk back to everyone but never start the conversation. Shout at me in a canyon and I'll repeat your last words, though I'm not even alive. Who am I?",
+        answer:
+        "Echo"
+    },
+
+    {
+        question:
+        "I'm a recipe with no physical ingredients. Follow my exact steps, and I will solve your computational problem every time. What am I?",
+        answer:
+        "Algorithm"
+    },
+
+    {
+        question:
+        "Two friends each hold what the other needs, and both wait forever. What is this?",
+        answer:
+        "Deadlock"
+    },
+
+    {
+        question:
+        "I protect your data without using a lock or a key. What am I?",
+        answer:
+        "Encryption"
+    },
+
+    {
+        question:
+        "What are stolen in the day and appear at night?",
+        answer:
+        "Stars / Moon"
+    },
+
+    {
+        question:
+        "You write in English-like code. I convert it all into 0s and 1s before you blink. What am I?",
+        answer:
+        "A Compiler"
+    },
+
+    {
+        question:
+        "What can you catch but never throw?",
+        answer:
+        "A Cold"
+    },
+
+    {
+        question:
+        "I am full of holes, but I can still hold water. What am I?",
+        answer:
+        "A Sponge"
+    },
+
+    {
+        question:
+        "I’m a named box in your code. What’s inside me can change a thousand times, but my name always stays exactly the same. What am I?",
+        answer:
+        "Variable"
+    },
+
+    {
+        question:
+        "Delete me by mistake, and you will wish you had another version of me. What am I?",
+        answer:
+        "Backup"
+    },
+
+    {
+        question:
+        "Why did the computer get specs?",
+        answer:
+        "To improve its web-site."
+    },
+
+    {
+        question:
+        "I'm always running, but I never move. I have a bug's name but I'm not an insect. Fix me and I'll behave. What am I?",
+        answer:
+        "A Program"
+    },
+
+    {
+        question:
+        "I'm tall when I'm young and short when I'm old. I cry while I work, and wind is my worst enemy. What am I?",
+        answer:
+        "Candle"
+    }
+
+];
+
+
+/* =====================================================
+   GAME VARIABLES
+===================================================== */
+
+let currentIndex = 0;
+
+
+/* =====================================================
+   DISPLAY RIDDLE
+===================================================== */
+
+function displayRiddle() {
+
+    const riddle = riddles[currentIndex];
+
+    document.getElementById("riddleText").textContent =
+        riddle.question;
+
+    document.getElementById("answerText").textContent =
+        riddle.answer;
+
+    document.getElementById("counter").textContent =
+        `Riddle ${currentIndex + 1} / ${riddles.length}`;
+
+    const progress =
+        ((currentIndex + 1) / riddles.length) * 100;
+
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+
+    /* Reset card to front */
+    document
+        .getElementById("flashcard")
+        .classList.remove("flipped");
+}
+
+
+/* =====================================================
+   FLIP CARD
+===================================================== */
+
+function flipCard(event) {
+
+    if (event) {
+        event.stopPropagation();
+    }
+
+    document
+        .getElementById("flashcard")
+        .classList.toggle("flipped");
+}
+
+
+/* =====================================================
+   NEXT
+===================================================== */
+
+function nextRiddle(event) {
+
+    if (event) {
+        event.stopPropagation();
+    }
+
+    if (currentIndex < riddles.length - 1) {
+
+        currentIndex++;
+
+        displayRiddle();
+
+    } else {
+
+        endGame();
+
+    }
+}
+
+
+/* =====================================================
+   PREVIOUS
+===================================================== */
+
+function previousRiddle(event) {
+
+    if (event) {
+        event.stopPropagation();
+    }
+
+    if (currentIndex > 0) {
+
+        currentIndex--;
+
+        displayRiddle();
+
+    }
+}
+
+
+/* =====================================================
+   END GAME
+===================================================== */
+
+function endGame(event) {
+
+    if (event) {
+        event.stopPropagation();
+    }
+
+    document
+        .getElementById("gameContainer")
+        .classList.add("finished");
+
+    document
+        .getElementById("thankYou")
+        .classList.add("show");
+
+    createConfetti();
+}
+
+
+/* =====================================================
+   PLAY AGAIN
+===================================================== */
+
+function playAgain() {
+
+    currentIndex = 0;
+
+    document
+        .getElementById("gameContainer")
+        .classList.remove("finished");
+
+    document
+        .getElementById("thankYou")
+        .classList.remove("show");
+
+    displayRiddle();
+}
+
+
+/* =====================================================
+   CONFETTI
+===================================================== */
+
+function createConfetti() {
+
+    const emojis = [
+        "🎉",
+        "✨",
+        "🎊",
+        "💖",
+        "⭐",
+        "🌸",
+        "🎈"
+    ];
+
+    for (let i = 0; i < 50; i++) {
+
+        const confetti =
+            document.createElement("div");
+
+        confetti.classList.add("confetti");
+
+        confetti.textContent =
+            emojis[
+                Math.floor(Math.random() * emojis.length)
+            ];
+
+        confetti.style.left =
+            Math.random() * 100 + "vw";
+
+        confetti.style.animationDuration =
+            (2 + Math.random() * 3) + "s";
+
+        confetti.style.fontSize =
+            (12 + Math.random() * 15) + "px";
+
+        document.body.appendChild(confetti);
+
+        setTimeout(() => {
+            confetti.remove();
+        }, 5000);
+    }
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+displayRiddle();
+
+</script>
+
+</body>
+</html>
